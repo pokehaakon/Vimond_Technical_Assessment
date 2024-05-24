@@ -1,3 +1,6 @@
+import Interval.IntegerInterval;
+import Interval.Interval;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,9 +17,9 @@ public abstract class Tools {
      * @return A list of the parsed intervals
      * @throws IOException if the reader throws
      */
-    static public List<Interval> parseIntervalsFromInput(BufferedReader reader) throws IOException {
+    static public List<IntegerInterval> parseIntervalsFromInput(BufferedReader reader) throws IOException {
         return Arrays.stream(reader.readLine().split(", "))
-                .map(Interval::parseInterval)
+                .map(IntegerInterval::parseInterval)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -27,15 +30,15 @@ public abstract class Tools {
      * @param intervals the initial list of intervals
      * @return A list of intervals sorted by the start of the intervals, all starts of intervals are unique!
      */
-    static public List<Interval> combineOverlappingIntervals(List<Interval> intervals) {
+    static public List<IntegerInterval> combineOverlappingIntervals(List<IntegerInterval> intervals) {
         // sort by start of interval.
         // In this step we could also combine all intervals
         // with equal starts by choosing the one with the maximal .end
-        intervals.sort(Comparator.comparingInt(i -> i.start));
-        List<Interval> stack = new ArrayList<>();
+        intervals.sort(Comparator.comparingInt(Interval::getStart));
+        List<IntegerInterval> stack = new ArrayList<>();
 
-        Interval current = intervals.get(0);
-        for (Interval next : intervals) {
+        IntegerInterval current = intervals.get(0);
+        for (IntegerInterval next : intervals) {
             if (current.intersects(next) || current.isSequentialWith(next)) {
                 current = current.union(next);
             } else {
@@ -59,13 +62,13 @@ public abstract class Tools {
      * @param exclude List of the excluded intervals
      * @return List of the minimal set of intervals in sorted order
      */
-    static public List<Interval> minimalNonExcludedIntervalCovering(List<Interval> include, List<Interval> exclude) {
+    static public List<IntegerInterval> minimalNonExcludedIntervalCovering(List<IntegerInterval> include, List<IntegerInterval> exclude) {
         include = combineOverlappingIntervals(include);
         exclude = combineOverlappingIntervals(exclude);
-        List<Interval> stack = new ArrayList<>();
+        List<IntegerInterval> stack = new ArrayList<>();
 
         int includeIndex = 0, excludeIndex = 0;
-        Interval in, ex;
+        IntegerInterval in, ex;
         while (includeIndex < include.size() && excludeIndex < exclude.size()) {
             in = include.get(includeIndex);
             ex = exclude.get(excludeIndex);
@@ -85,11 +88,11 @@ public abstract class Tools {
                 continue;
             }
             if (ex.leftIntersects(in) || ex.splits(in)) {
-                include.set(includeIndex, Interval.of(ex.end + 1, in.end));
+                include.set(includeIndex, IntegerInterval.of(ex.getEnd() + 1, in.getEnd()));
                 excludeIndex++;
             }
             if (ex.rightIntersects(in) || ex.splits(in)) {
-                stack.add(Interval.of(in.start, ex.start - 1));
+                stack.add(IntegerInterval.of(in.getStart(), ex.getStart() - 1));
                 includeIndex++;
             }
             if (ex.splits(in)) {

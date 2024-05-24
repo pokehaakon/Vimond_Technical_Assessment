@@ -1,3 +1,4 @@
+import Interval.IntegerInterval;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
@@ -5,6 +6,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import Interval.UnionException;
 
 public class IntervalTest {
 
@@ -93,23 +95,23 @@ public class IntervalTest {
         }
     }
 
-    private Interval in0 = Interval.of(-1, -3);
-    private Interval in1 = Interval.of(1, 3);
-    private Interval in2 = Interval.of(2, 2);
-    private Interval in3 = Interval.of(5, 7);
-    private Interval in4 = Interval.of(6, 9);
-    private Interval in5 = Interval.of(10, 11);
+    final private IntegerInterval in0 = IntegerInterval.of(-1, -3);
+    final private IntegerInterval in1 = IntegerInterval.of(1, 3);
+    final private IntegerInterval in2 = IntegerInterval.of(2, 2);
+    final private IntegerInterval in3 = IntegerInterval.of(5, 7);
+    final private IntegerInterval in4 = IntegerInterval.of(6, 9);
+    final private IntegerInterval in5 = IntegerInterval.of(10, 11);
 
-    private Interval[] intervals = {in0, in1, in2, in3, in4, in5, Interval.of(3, -1)};
+    final private IntegerInterval[] intervals = {in0, in1, in2, in3, in4, in5, IntegerInterval.of(3, -1)};
 
 
     @Test
     public void testIntervalConstruction() {
-        Interval in1 = Interval.of(-10, 30);
-        Interval in2 = Interval.of(30, -10);
+        IntegerInterval in1 = IntegerInterval.of(-10, 30);
+        IntegerInterval in2 = IntegerInterval.of(30, -10);
 
-        assertEquals(-10, in1.start);
-        assertEquals(30, in1.end);
+        assertEquals(-10, in1.getStart());
+        assertEquals(30, in1.getEnd());
         assertEquals(in1, in2);
     }
 
@@ -124,12 +126,12 @@ public class IntervalTest {
         assertEquals(in1, in2.union(in1));
 
         //Overlapping intervals
-        Interval in3_in4 = Interval.of(5, 9);
+        IntegerInterval in3_in4 = IntegerInterval.of(5, 9);
         assertEquals(in3_in4, in3.union(in4));
         assertEquals(in3_in4, in4.union(in3));
 
         //Non-overlapping but touching intervals
-        Interval in4_in5 = Interval.of(6, 11);
+        IntegerInterval in4_in5 = IntegerInterval.of(6, 11);
         assertEquals(in4_in5, in4.union(in5));
         assertEquals(in4_in5, in5.union(in4));
 
@@ -140,8 +142,8 @@ public class IntervalTest {
     @Test
     public void testIntersection() {
         //binary relations
-        testSymmetric(Interval::intersects, intervals);
-        testReflexive(Interval::intersects, intervals);
+        testSymmetric(IntegerInterval::intersects, intervals);
+        testReflexive(IntegerInterval::intersects, intervals);
 
         //One interval contained in the other
         assertTrue(in1.intersects(in2));
@@ -156,8 +158,8 @@ public class IntervalTest {
     @Test
     public void testSequentialWith() {
         //binary relations
-        testSymmetric(Interval::isSequentialWith, intervals);
-        testIrreflexive(Interval::isSequentialWith, intervals);
+        testSymmetric(IntegerInterval::isSequentialWith, intervals);
+        testIrreflexive(IntegerInterval::isSequentialWith, intervals);
 
         //One interval contained in the other
         assertFalse(in1.isSequentialWith(in2));
@@ -172,8 +174,8 @@ public class IntervalTest {
     @Test
     public void testCovers() {
         //binary relations
-        testReflexive(Interval::covers, intervals);
-        testAntisymmetric(Interval::covers, intervals);
+        testReflexive(IntegerInterval::covers, intervals);
+        testAntisymmetric(IntegerInterval::covers, intervals);
 
         //One interval contained in the other
         assertTrue(in1.covers(in2));
@@ -189,8 +191,8 @@ public class IntervalTest {
     @Test
     public void testSplits() {
         //binary relations
-        testIrreflexive(Interval::splits, intervals); //redundant
-        testAsymmetric(Interval::splits, intervals);
+        testIrreflexive(IntegerInterval::splits, intervals); //redundant
+        testAsymmetric(IntegerInterval::splits, intervals);
 
         //One interval contained in the other
         assertFalse(in1.splits(in2));
@@ -206,7 +208,7 @@ public class IntervalTest {
     @Test
     public void testLeftIntersects() {
         //binary relations
-        testReflexive(Interval::leftIntersects, intervals);
+        testReflexive(IntegerInterval::leftIntersects, intervals);
 
         //One interval contained in the other
         assertTrue(in1.leftIntersects(in2));
@@ -221,7 +223,7 @@ public class IntervalTest {
     @Test
     public void testRightIntersects() {
         //binary relations
-        testReflexive(Interval::rightIntersects, intervals);
+        testReflexive(IntegerInterval::rightIntersects, intervals);
 
         //One interval contained in the other
         assertFalse(in2.rightIntersects(in1));
@@ -236,8 +238,8 @@ public class IntervalTest {
     @Test
     public void testEndsBefore() {
         //binary relations
-        testIrreflexive(Interval::endsBefore, intervals); //redundant
-        testAsymmetric(Interval::endsBefore, intervals);
+        testIrreflexive(IntegerInterval::endsBefore, intervals); //redundant
+        testAsymmetric(IntegerInterval::endsBefore, intervals);
 
         //One interval contained in the other
         assertFalse(in2.endsBefore(in1));
@@ -274,39 +276,39 @@ public class IntervalTest {
 
     @Test
     public void testParseInterval() {
-        testAll(in -> assertEquals(in, Interval.parseInterval(in.toString())), intervals);
-        assertEquals(in0, Interval.parseInterval("-1--3 "));
-        assertEquals(in0, Interval.parseInterval(" -3--1"));
+        testAll(in -> assertEquals(in, IntegerInterval.parseInterval(in.toString())), intervals);
+        assertEquals(in0, IntegerInterval.parseInterval("-1--3 "));
+        assertEquals(in0, IntegerInterval.parseInterval(" -3--1"));
 
-        assertThrowsExactly(RuntimeException.class, () -> Interval.parseInterval("-1"));
+        assertThrowsExactly(RuntimeException.class, () -> IntegerInterval.parseInterval("-1"));
     }
 
     @Test
     public void testEquals() {
-        testReflexive(Interval::equals, intervals);
-        testSymmetric(Interval::equals, intervals);
-        testTransitive(Interval::equals, intervals);
+        testReflexive(IntegerInterval::equals, intervals);
+        testSymmetric(IntegerInterval::equals, intervals);
+        testTransitive(IntegerInterval::equals, intervals);
 
-        Interval otherIn1 = Interval.of(1, 3);
+        IntegerInterval otherIn1 = IntegerInterval.of(1, 3);
 
-        assertEquals(in1.start, otherIn1.start);
-        assertEquals(in1.end, otherIn1.end);
+        assertEquals(in1.getStart(), otherIn1.getStart());
+        assertEquals(in1.getEnd(), otherIn1.getEnd());
         assertEquals(in1, otherIn1);
 
-        assertNotEquals(in1, Interval.of(1, 2));
-        assertNotEquals(in1, Interval.of(2, 3));
+        assertNotEquals(in1, IntegerInterval.of(1, 2));
+        assertNotEquals(in1, IntegerInterval.of(2, 3));
 
         assertNotEquals(in1, "notSameType");
     }
 
     @Test
     public void testOf() {
-        assertEquals(Interval.of(1, 3), Interval.of(3, 1));
+        assertEquals(IntegerInterval.of(1, 3), IntegerInterval.of(3, 1));
         for (int i = -30; i < 20; i += 5) {
             for (int j = -10; j < 35; j += 5) {
-                Interval testInterval = Interval.of(i, j);
-                assertEquals(testInterval, Interval.of(i, j));
-                assertEquals(testInterval, Interval.of(j, i));
+                IntegerInterval testInterval = IntegerInterval.of(i, j);
+                assertEquals(testInterval, IntegerInterval.of(i, j));
+                assertEquals(testInterval, IntegerInterval.of(j, i));
             }
         }
     }
