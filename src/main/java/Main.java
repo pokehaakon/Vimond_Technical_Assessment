@@ -16,6 +16,6 @@ public class Main {
         exclude = Tools.combineOverlappingIntervals(exclude);
         System.out.println("Exclude: " + exclude);
 
-        System.out.println("Results: " + Tools.doThing(include, exclude));
+        System.out.println("Results: " + Tools.minimalNonExcludedIntervalCovering(include, exclude));
     }
 }
