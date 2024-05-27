@@ -7,15 +7,8 @@ public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         List<Interval> include = Tools.parseIntervalsFromInput(reader);
-        System.out.println("Include: " + include);
-        include = Tools.combineOverlappingIntervals(include);
-        System.out.println("Include: " + include);
-
         List<Interval> exclude = Tools.parseIntervalsFromInput(reader);
-        System.out.println("Exclude: " + exclude);
-        exclude = Tools.combineOverlappingIntervals(exclude);
-        System.out.println("Exclude: " + exclude);
-
-        System.out.println("Results: " + Tools.minimalNonExcludedIntervalCovering(include, exclude));
+        List<Interval> results = Tools.minimalNonExcludedIntervalCovering(include, exclude);
+        System.out.println(results.isEmpty() ? "(none)" : results);
     }
 }

@@ -15,7 +15,13 @@ public abstract class Tools {
      * @throws IOException if the reader throws
      */
     static public List<Interval> parseIntervalsFromInput(BufferedReader reader) throws IOException {
-        return Arrays.stream(reader.readLine().split(", "))
+        String line = reader.readLine().strip();
+        if (line.isEmpty() || line.equals("(none)")) {
+            return new ArrayList<>();
+        }
+        String[] intervalStrings = line.split(",");
+
+        return Arrays.stream(intervalStrings)
                 .map(Interval::parseInterval)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
